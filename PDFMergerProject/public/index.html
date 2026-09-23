@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>PDF Merger Tool</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+        <div class="container">
+
+            <!-- Logo / Brand -->
+            <a class="navbar-brand font-weight-bold" href="/">
+                PDF Tools
+            </a>
+
+
+            <!-- Mobile menu button -->
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-toggle="collapse"
+                data-target="#navbarMenu"
+                aria-controls="navbarMenu"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+
+                <span class="navbar-toggler-icon"></span>
+
+            </button>
+
+
+            <!-- Navbar links -->
+            <div
+                class="collapse navbar-collapse"
+                id="navbarMenu">
+
+                <ul class="navbar-nav ml-auto">
+
+                    <li class="nav-item active">
+
+                        <a class="nav-link" href="/">
+                            Home
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="#merger">
+                            PDF Merger
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item">
+
+                        <a class="nav-link" href="#about">
+                            About
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <div class="container mt-5" id="merger">
+
+        <div class="card shadow">
+
+            <div class="card-body p-5">
+
+                <h1 class="text-center">
+                    PDF Merger Tool
+                </h1>
+
+                <p class="text-center text-muted">
+                    Select two or more PDF files and merge them
+                    into a single PDF.
+                </p>
+
+
+                <!-- Upload Form -->
+
+                <form id="mergeForm">
+
+                    <div class="form-group">
+
+                        <label for="pdfs">
+
+                            <strong>
+                                Select PDF files
+                            </strong>
+
+                        </label>
+
+                        <input
+                            type="file"
+                            class="form-control-file"
+                            id="pdfs"
+                            name="pdfs"
+                            accept=".pdf"
+                            multiple
+                            required>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-block">
+
+                        Merge PDFs
+
+                    </button>
+
+                </form>
+
+
+                <!-- Status message -->
+
+                <div
+                    id="message"
+                    class="mt-4 text-center">
+                </div>
+
+
+                <!-- Download button -->
+
+                <div
+                    id="downloadSection"
+                    class="text-center mt-3"
+                    style="display: none;">
+
+                    <a
+                        id="downloadLink"
+                        href="/download"
+                        class="btn btn-success">
+
+                        Download Merged PDF
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= ABOUT ================= -->
+
+    <div
+        class="container my-5"
+        id="about">
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h3>
+                    About PDF Merger
+                </h3>
+
+                <p class="text-muted">
+
+                    This tool allows you to select multiple PDF
+                    files and combine them into one PDF document.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="bg-dark text-white text-center py-3">
+
+        <p class="mb-0">
+            © 2026 PDF Tools | PDF Merger
+        </p>
+
+    </footer>
+
+
+    <!-- Bootstrap JavaScript -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js">
+    </script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+
+    <!-- PDF Merger JavaScript -->
+
+    <script>
+
+        const form =
+            document.getElementById('mergeForm');
+
+        const message =
+            document.getElementById('message');
+
+        const downloadSection =
+            document.getElementById('downloadSection');
+
+
+        form.addEventListener(
+            'submit',
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const files =
+                    document.getElementById('pdfs').files;
+
+
+                if (files.length < 2) {
+
+                    message.innerHTML =
+                        '<p class="text-danger">' +
+                        'Please select at least 2 PDF files.' +
+                        '</p>';
+
+                    return;
+
+                }
+
+
+                const formData =
+                    new FormData();
+
+
+                for (const file of files) {
+
+                    formData.append(
+                        'pdfs',
+                        file
+                    );
+
+                }
+
+
+                message.innerHTML =
+                    '<p class="text-info">' +
+                    'Merging PDFs...' +
+                    '</p>';
+
+
+                downloadSection.style.display =
+                    'none';
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            '/merge',
+                            {
+                                method: 'POST',
+                                body: formData
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            result.error
+                        );
+
+                    }
+
+
+                    message.innerHTML =
+                        '<p class="text-success">' +
+                        result.message +
+                        '</p>';
+
+
+                    downloadSection.style.display =
+                        'block';
+
+
+                } catch (error) {
+
+                    message.innerHTML =
+                        '<p class="text-danger">' +
+                        error.message +
+                        '</p>';
+
+                }
+
+            }
+
+        );
+
+    </script>
+
+</body>
+
+</html>
